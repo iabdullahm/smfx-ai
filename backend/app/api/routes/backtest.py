@@ -13,7 +13,7 @@ def backtest(
     timeframe: str = Query("H1"),
     lookback: int = Query(800, ge=200, le=2000),
     forward_window: int = Query(30, ge=5, le=120),
-    min_strength: float = Query(6.0, ge=1.0, le=10.0),
+    min_strength: float = Query(5.0, ge=1.0, le=10.0),
     step: int = Query(3, ge=1, le=20),
     include_log: bool = Query(False),
 ):

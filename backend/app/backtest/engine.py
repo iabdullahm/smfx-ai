@@ -110,7 +110,7 @@ def run_backtest(
     lookback: int = 1000,
     warmup: int = 200,
     forward_window: int = 30,
-    min_strength: float = 6.0,
+    min_strength: float = 5.0,
     step: int = 3,
 ) -> BacktestReport:
     """Run a walk-forward backtest.

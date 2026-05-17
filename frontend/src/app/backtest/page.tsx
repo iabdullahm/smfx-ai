@@ -12,7 +12,7 @@ const TFS = ['M15', 'H1', 'H4', 'D1'];
 export default function BacktestPage() {
   const [symbol, setSymbol] = useState('XAUUSD');
   const [tf, setTf] = useState('H1');
-  const [minStrength, setMinStrength] = useState(6.0);
+  const [minStrength, setMinStrength] = useState(5.0);
   const [report, setReport] = useState<BacktestReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +41,10 @@ export default function BacktestPage() {
         <p className="text-gray-400 mb-6">
           قياس دقة النظام على بيانات تاريخية حقيقية. كل صفقة تُحتسب بـ R (multiples of risk).
         </p>
+        <div className="bg-bg-panel border border-bg-border rounded-xl p-3 mb-6 text-sm text-gray-300">
+          💡 <strong>تلميح:</strong> ابدأ بـ <span className="text-brand-300">minStrength=5</span> للحصول على عينة جيدة من الصفقات.
+          ارفعها لـ <span className="text-brand-300">6-7</span> لتركيز أعلى ودقة أكبر (لكن صفقات أقل).
+        </div>
 
         <div className="card mb-6 flex flex-wrap gap-3 items-end">
           <div>

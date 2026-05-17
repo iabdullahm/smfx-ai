@@ -137,11 +137,17 @@ def aggregate(df: pd.DataFrame, symbol: str = "XAUUSD") -> dict[str, Any]:
     side = "BUY" if score >= 0 else "SELL"
     entry, sl, tp1, tp2, tp3 = _entry_sl_tp(df, side)
 
-    raw_strength = (abs(score) * 0.6 + confidence * 0.3 + (aligned / len(outputs)) * 0.1)
+    # Strength formula — recalibrated so realistic signals span 3–9 (was 1–5):
+    #  • |score|   weighted 55% (signed agreement among schools)
+    #  • confidence weighted 30%
+    #  • alignment_ratio used as a multiplier that *boosts* up to +35%
+    alignment_ratio = aligned / max(len(outputs), 1)
+    base = abs(score) * 0.55 + confidence * 0.30
+    raw_strength = base * (1.0 + alignment_ratio * 0.6)
     strength = float(np.clip(round(raw_strength * 10, 1), 1.0, 10.0))
 
     regime = classify_regime(df)
-    base_prob = 45 + raw_strength * 30
+    base_prob = 45 + raw_strength * 32
     if regime == "trending" and abs(score) > 0.2:
         base_prob += 5
     if regime == "ranging":
