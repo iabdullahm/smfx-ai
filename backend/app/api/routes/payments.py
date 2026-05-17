@@ -40,6 +40,28 @@ def payment_status():
     }
 
 
+@router.get("/diagnose")
+def payment_diagnose():
+    """Attempts a minimal invoice creation and returns the raw error if any.
+
+    Use this from a browser to see exactly why checkout is failing.
+    """
+    if not nowpayments.is_configured():
+        return {"ok": False, "stage": "configuration", "error": "NOWPAYMENTS_API_KEY missing"}
+    try:
+        invoice = nowpayments.create_invoice(
+            price_amount=49.0,
+            order_id="diagnose-test",
+            order_description="Diagnose-only test invoice",
+            success_url="https://smfx-ai.vercel.app/payment/success",
+            cancel_url="https://smfx-ai.vercel.app/payment/cancel",
+            ipn_callback_url="https://smfx-ai-production.up.railway.app/api/payments/webhook",
+        )
+        return {"ok": True, "invoice_id": invoice.get("id"), "invoice_url": invoice.get("invoice_url")}
+    except Exception as e:
+        return {"ok": False, "stage": "create_invoice", "error": str(e)}
+
+
 @router.post("/checkout")
 def create_checkout(payload: CheckoutRequest, request: Request, db: Session = Depends(get_db)):
     if payload.plan not in PLAN_PRICES_USD:
