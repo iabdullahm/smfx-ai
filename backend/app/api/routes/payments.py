@@ -94,11 +94,25 @@ def create_checkout(payload: CheckoutRequest, request: Request, db: Session = De
     db.commit()
     db.refresh(sub)
 
-    # Build callback URLs based on incoming request
+    # Build callback URLs. Trust client-supplied values only if they look like
+    # real URIs; otherwise fall back to sensible defaults based on the request
+    # Origin header (so it works for both prod Vercel and local dev).
+    def _safe_url(value: str | None) -> str | None:
+        if not value:
+            return None
+        if not value.startswith(("http://", "https://")):
+            return None
+        if "{" in value or "}" in value:
+            return None
+        return value
+
     base = str(request.base_url).rstrip("/")
-    frontend = (request.headers.get("origin") or "").rstrip("/")
-    success_url = payload.success_url or f"{frontend}/payment/success?sub={sub.id}"
-    cancel_url = payload.cancel_url or f"{frontend}/payment/cancel?sub={sub.id}"
+    frontend = (
+        _safe_url(request.headers.get("origin"))
+        or "https://smfx-ai.vercel.app"
+    ).rstrip("/")
+    success_url = _safe_url(payload.success_url) or f"{frontend}/payment/success?sub={sub.id}"
+    cancel_url  = _safe_url(payload.cancel_url)  or f"{frontend}/payment/cancel?sub={sub.id}"
     ipn_callback_url = f"{base}/api/payments/webhook"
 
     try:

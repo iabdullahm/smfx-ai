@@ -104,12 +104,9 @@ export const api = {
   checkout: (plan: string, email: string) =>
     http<CheckoutResponse>('/api/payments/checkout', {
       method: 'POST',
-      body: JSON.stringify({
-        plan,
-        email,
-        success_url: `${window.location.origin}/payment/success?sub={ID}`,
-        cancel_url: `${window.location.origin}/payment/cancel?sub={ID}`,
-      }),
+      // Let the backend build success_url / cancel_url using the request
+      // Origin header — that way the actual subscription id ends up in them.
+      body: JSON.stringify({ plan, email }),
     }),
   getSubscription: (id: number) => http<SubscriptionStatus>(`/api/payments/subscription/${id}`),
   paymentStatus: () => http<{ provider: string; configured: boolean }>('/api/payments/status'),
