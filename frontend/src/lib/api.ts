@@ -47,6 +47,36 @@ export type NewsItem = {
   event_time: string;
   forecast: string;
   previous: string;
+  actual?: string;
+};
+
+export type EconomicCalendar = {
+  source: 'live' | 'synthetic';
+  count: number;
+  events: NewsItem[];
+};
+
+export type SymbolHeadline = {
+  title: string;
+  summary: string;
+  publisher: string;
+  link: string;
+  published_at: string;
+  sentiment: number;
+};
+
+export type SymbolNews = {
+  symbol: string;
+  count: number;
+  headlines: SymbolHeadline[];
+  aggregate: {
+    score: number;
+    n_articles: number;
+    bullish: number;
+    bearish: number;
+    neutral: number;
+    samples: Array<{ title: string; sentiment: number; publisher: string; link: string }>;
+  } | null;
 };
 
 export type Plan = {
@@ -132,7 +162,9 @@ export const api = {
   backtest: (symbol: string, timeframe = 'H1', minStrength = 6.0) =>
     http<BacktestReport>(`/api/backtest/${symbol}?timeframe=${timeframe}&min_strength=${minStrength}&lookback=800`),
   upcomingNews: (hours = 48, impact = 'all') =>
-    http<NewsItem[]>(`/api/news/upcoming?hours=${hours}&impact=${impact}`),
+    http<EconomicCalendar>(`/api/news/upcoming?hours=${hours}&impact=${impact}`),
+  symbolNews: (symbol: string, limit = 8) =>
+    http<SymbolNews>(`/api/news/symbol/${symbol}?limit=${limit}`),
   plans: () => http<Plan[]>('/api/subscriptions/plans'),
   symbols: () => http<{ symbols: string[]; threshold: number }>('/api/signals/symbols/all'),
   health: () => http<{ status: string }>('/health'),

@@ -19,7 +19,7 @@ export default function DashboardPage() {
       setError(null);
       const [sigs, n] = await Promise.all([api.latestSignals(12), api.upcomingNews(48)]);
       setSignals(sigs);
-      setNews(n);
+      setNews(n.events ?? []);
     } catch (e: any) {
       setError(e.message);
     }
