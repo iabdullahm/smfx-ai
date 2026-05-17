@@ -64,7 +64,40 @@ export type AnalysisResult = Signal & {
   composite_score: number;
   composite_confidence: number;
   aligned_schools: number;
+  total_schools?: number;
   data_source?: 'live' | 'synthetic';
+  mtf?: {
+    confluence: number;
+    total_timeframes: number;
+    confluence_pct: number;
+    majority_side: 'BUY' | 'SELL';
+    weighted_score: number;
+    weighted_confidence: number;
+    per_timeframe: Record<string, {
+      side: 'BUY' | 'SELL';
+      strength: number;
+      win_probability: number;
+      composite_score: number;
+    }>;
+  };
+};
+
+export type BacktestReport = {
+  symbol: string;
+  timeframe: string;
+  bars: number;
+  trades: number;
+  wins: number;
+  losses: number;
+  win_rate_pct: number;
+  profit_factor: number;
+  avg_r: number;
+  expectancy_r: number;
+  max_drawdown_r: number;
+  largest_win_r: number;
+  largest_loss_r: number;
+  tp_distribution: { tp1: number; tp2: number; tp3: number; sl: number; timeout: number };
+  equity_curve_r: number[];
 };
 
 export type CheckoutResponse = {
@@ -94,8 +127,10 @@ export const api = {
       body: JSON.stringify({ symbol, timeframe, lookback: 200 }),
     }),
   latestSignals: (limit = 20) => http<Signal[]>(`/api/signals/latest?limit=${limit}`),
-  analyze: (symbol: string, timeframe = 'H1') =>
-    http<AnalysisResult>(`/api/analysis/${symbol}?timeframe=${timeframe}`),
+  analyze: (symbol: string, timeframe = 'H1', mtf = false) =>
+    http<AnalysisResult>(`/api/analysis/${symbol}?timeframe=${timeframe}&mtf=${mtf}`),
+  backtest: (symbol: string, timeframe = 'H1', minStrength = 6.0) =>
+    http<BacktestReport>(`/api/backtest/${symbol}?timeframe=${timeframe}&min_strength=${minStrength}&lookback=800`),
   upcomingNews: (hours = 48, impact = 'all') =>
     http<NewsItem[]>(`/api/news/upcoming?hours=${hours}&impact=${impact}`),
   plans: () => http<Plan[]>('/api/subscriptions/plans'),

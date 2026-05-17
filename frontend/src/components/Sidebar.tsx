@@ -1,12 +1,13 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Activity, CalendarClock, CreditCard, LogIn, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Activity, CalendarClock, CreditCard, LogIn, Sparkles, TrendingUp } from 'lucide-react';
 import clsx from 'clsx';
 
 const items = [
   { href: '/dashboard', label: 'لوحة التحكم', icon: LayoutDashboard },
   { href: '/signals', label: 'الإشارات', icon: Activity },
+  { href: '/backtest', label: 'الاختبار التاريخي', icon: TrendingUp },
   { href: '/news', label: 'الأخبار الاقتصادية', icon: CalendarClock },
   { href: '/subscriptions', label: 'الاشتراكات', icon: CreditCard },
   { href: '/login', label: 'تسجيل الدخول', icon: LogIn },
@@ -43,7 +44,7 @@ export default function Sidebar() {
           );
         })}
       </nav>
-      <div className="text-xs text-gray-500 mt-4 px-2">v1.0.0 · MVP</div>
+      <div className="text-xs text-gray-500 mt-4 px-2">v1.1.0 · 9 محركات · MTF</div>
     </aside>
   );
 }
