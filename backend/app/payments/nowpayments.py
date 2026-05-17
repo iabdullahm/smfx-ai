@@ -56,26 +56,32 @@ def create_invoice(
     success_url: str,
     cancel_url: str,
     ipn_callback_url: str,
-    pay_currency: str = "usdttrc20",   # USDT on Tron — cheapest fees
+    pay_currency: str | None = None,    # None → customer picks at checkout (incl. card)
     price_currency: str = "usd",
 ) -> dict[str, Any]:
     """Create a hosted invoice. Returns dict with `id` and `invoice_url`.
 
-    `pay_currency` controls what you receive (USDT on TRC20 by default).
-    `price_currency` is what the customer sees ($USD).
+    If `pay_currency` is None, the customer chooses at checkout — and if the
+    NOWPayments account has 'Accept Fiat Payments' enabled, **Visa / Mastercard**
+    appears as an option alongside crypto. The merchant always receives funds
+    in the currency configured in their Payout Wallet (e.g., USDT TRC20).
     """
-    payload = {
+    payload: dict[str, Any] = {
         "price_amount": price_amount,
         "price_currency": price_currency,
-        "pay_currency": pay_currency,
         "order_id": order_id,
         "order_description": order_description,
         "ipn_callback_url": ipn_callback_url,
         "success_url": success_url,
         "cancel_url": cancel_url,
-        "is_fixed_rate": True,
         "is_fee_paid_by_user": False,
     }
+    if pay_currency:
+        # Lock the invoice to a specific crypto (e.g. usdttrc20). When set, the
+        # hosted page won't show alternative methods including card.
+        payload["pay_currency"] = pay_currency
+        payload["is_fixed_rate"] = True
+
     r = httpx.post(f"{NOWPAYMENTS_API}/invoice", headers=_headers(), json=payload, timeout=20)
     if r.status_code >= 400:
         raise NOWPaymentsError(f"create_invoice failed {r.status_code}: {r.text}")
