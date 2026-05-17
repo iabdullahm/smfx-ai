@@ -67,6 +67,26 @@ export type AnalysisResult = Signal & {
   data_source?: 'live' | 'synthetic';
 };
 
+export type CheckoutResponse = {
+  subscription_id: number;
+  invoice_id: string;
+  invoice_url: string;
+  amount: number;
+  currency: string;
+  expires_at: string;
+};
+
+export type SubscriptionStatus = {
+  id: number;
+  plan: string;
+  status: 'pending' | 'active' | 'cancelled' | 'expired' | 'failed';
+  amount_usd: number;
+  payment_provider: string;
+  payment_status: string;
+  started_at: string | null;
+  expires_at: string | null;
+};
+
 export const api = {
   generateSignal: (symbol = 'XAUUSD', timeframe = 'H1') =>
     http<Signal>('/api/signals/generate', {
@@ -81,4 +101,16 @@ export const api = {
   plans: () => http<Plan[]>('/api/subscriptions/plans'),
   symbols: () => http<{ symbols: string[]; threshold: number }>('/api/signals/symbols/all'),
   health: () => http<{ status: string }>('/health'),
+  checkout: (plan: string, email: string) =>
+    http<CheckoutResponse>('/api/payments/checkout', {
+      method: 'POST',
+      body: JSON.stringify({
+        plan,
+        email,
+        success_url: `${window.location.origin}/payment/success?sub={ID}`,
+        cancel_url: `${window.location.origin}/payment/cancel?sub={ID}`,
+      }),
+    }),
+  getSubscription: (id: number) => http<SubscriptionStatus>(`/api/payments/subscription/${id}`),
+  paymentStatus: () => http<{ provider: string; configured: boolean }>('/api/payments/status'),
 };

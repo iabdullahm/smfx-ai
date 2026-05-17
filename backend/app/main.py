@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import analysis, auth, news, signals, subscriptions
+from app.api.routes import analysis, auth, news, payments, signals, subscriptions
 from app.core.config import settings
 from app.db import init_db
 
@@ -46,6 +46,8 @@ def root():
             "GET  /api/analysis/{symbol}",
             "GET  /api/news/upcoming",
             "GET  /api/subscriptions/plans",
+            "POST /api/payments/checkout",
+            "POST /api/payments/webhook",
         ],
     }
 
@@ -60,3 +62,4 @@ app.include_router(signals.router)
 app.include_router(analysis.router)
 app.include_router(news.router)
 app.include_router(subscriptions.router)
+app.include_router(payments.router)
