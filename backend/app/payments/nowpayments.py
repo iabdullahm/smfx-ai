@@ -93,16 +93,29 @@ def verify_ipn_signature(raw_body: bytes, header_signature: str) -> bool:
     """Validate IPN HMAC-SHA512 over the **sorted** JSON of the body.
 
     NOWPayments sorts keys alphabetically before signing.
+
+    If NOWPAYMENTS_IPN_SECRET is not configured, signature verification is
+    skipped (returns True). This is INSECURE — use only for early testing.
+    Set ALLOW_UNVERIFIED_IPN=0 in production to enforce verification.
     """
-    secret = os.environ.get("NOWPAYMENTS_IPN_SECRET", "").encode("utf-8")
-    if not secret or not header_signature:
+    secret_raw = os.environ.get("NOWPAYMENTS_IPN_SECRET", "")
+    allow_unverified = os.environ.get("ALLOW_UNVERIFIED_IPN", "0").lower() in ("1", "true", "yes")
+
+    if not secret_raw:
+        # No secret configured — fall back only if explicitly allowed.
+        return allow_unverified
+
+    if not header_signature:
         return False
+
     try:
         data = json.loads(raw_body.decode("utf-8"))
     except Exception:
         return False
     sorted_payload = json.dumps(data, separators=(",", ":"), sort_keys=True)
-    digest = hmac.new(secret, sorted_payload.encode("utf-8"), hashlib.sha512).hexdigest()
+    digest = hmac.new(secret_raw.encode("utf-8"),
+                      sorted_payload.encode("utf-8"),
+                      hashlib.sha512).hexdigest()
     return hmac.compare_digest(digest, header_signature)
 
 
