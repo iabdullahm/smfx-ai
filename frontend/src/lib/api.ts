@@ -64,6 +64,7 @@ export type AnalysisResult = Signal & {
   composite_score: number;
   composite_confidence: number;
   aligned_schools: number;
+  data_source?: 'live' | 'synthetic';
 };
 
 export const api = {

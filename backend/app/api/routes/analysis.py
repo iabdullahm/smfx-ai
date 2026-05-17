@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from app.ai.aggregator import aggregate
-from app.data.market_feed import SUPPORTED_SYMBOLS, fetch_ohlcv
+from app.data.market_feed import SUPPORTED_SYMBOLS, fetch_ohlcv, get_data_source
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
@@ -23,4 +23,5 @@ def analyze_symbol(
     result["candles"] = candles[["time", "open", "high", "low", "close", "volume"]].to_dict("records")
     result["symbol"] = symbol.upper()
     result["timeframe"] = timeframe.upper()
+    result["data_source"] = get_data_source(symbol, timeframe)
     return result
