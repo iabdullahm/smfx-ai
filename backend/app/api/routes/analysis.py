@@ -3,8 +3,16 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.ai.aggregator import aggregate, aggregate_mtf
 from app.data.market_feed import SUPPORTED_SYMBOLS, fetch_ohlcv, get_data_source
+from app.data import yahoo_feed
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
+
+
+@router.get("/_diagnose/yahoo/{symbol}")
+def yahoo_diagnose(symbol: str):
+    """Diagnose Yahoo Finance fetch for a symbol — tries every fallback ticker
+    and reports what worked."""
+    return yahoo_feed.diagnose(symbol)
 
 
 @router.get("/{symbol}")
